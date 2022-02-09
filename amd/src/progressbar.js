@@ -41,6 +41,19 @@ define(['jquery', 'core/pubsub', 'core/utils'],
         }
 
         /**
+         * Hide progress event information for a cell.
+         * @param {Event} event
+         */
+        function hideInfo(event) {
+            var tableRow = $(this);
+            var cell = tableRow.find('.progressBarCell');
+            var container = cell.closest('.block_completion_progress .barContainer');
+            var visibleinfo = container.siblings('.progressEventInfo:visible');
+            visibleinfo.hide();
+            event.preventDefault();
+        }
+
+        /**
          * Show all progress event information (for accessibility).
          * @param {Event} event
          */
@@ -170,6 +183,9 @@ define(['jquery', 'core/pubsub', 'core/utils'],
 
             // Show information elements on hover or tap.
             barcontainers.on('touchstart mouseover', '.progressBarCell', showInfo);
+
+            // Hide additional information when hovering elsewhere
+            barcontainers.parents('tr').on('mouseleave touchcancel', hideInfo);
 
             // Navigate to the activity when its cell is clicked.
             barcontainers.on('click', '.progressBarCell[data-haslink=true]', viewActivity);
