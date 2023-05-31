@@ -61,6 +61,7 @@ $notesallowed = !empty($CFG->enablenotes) && has_capability('moodle/notes:manage
 $messagingallowed = !empty($CFG->messaging) && has_capability('moodle/site:sendmessage', $context);
 $bulkoperations = has_capability('moodle/course:bulkmessaging', $context) && ($notesallowed || $messagingallowed);
 
+$enddate = get_string('enddate') . ': ' . userdate($course->enddate, get_string('strftimedaydate', 'core_langconfig'));
 // Set up page parameters.
 $PAGE->set_course($course);
 $PAGE->set_url(
@@ -148,6 +149,11 @@ $table->is_downloading($download, 'completion_progress-' . $COURSE->shortname);
 $table->setup();
 
 if ($download) {
+    if ($download == 'html') {
+      echo html_writer::tag('h3', get_string('course') . ': ' . $course->fullname, array('style' => 'text-align: center;'));
+      echo html_writer::tag('h3', $enddate, array('style' => 'text-align: center;'));
+    }
+    
     $table->query_db($perpage);
     $table->start_output();
     $table->build_table();
@@ -160,6 +166,8 @@ $output = $PAGE->get_renderer('block_completion_progress');
 // Start page output.
 echo $output->header();
 echo $output->heading($title, 2);
+echo $output->heading($course->fullname, 3);
+echo $output->heading($enddate, 3);
 echo $output->container_start('block_completion_progress');
 
 // Check if activities/resources have been selected in config.

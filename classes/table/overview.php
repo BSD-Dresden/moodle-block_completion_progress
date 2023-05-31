@@ -94,7 +94,10 @@ class overview extends \table_sql {
 
         $tablecolumns[] = 'fullname';
         $tableheaders[] = get_string('fullname');
-
+        
+        $tablecolumns[] = 'email';
+        $tableheaders[] = get_string('email');
+        
         if (get_config('block_completion_progress', 'showlastincourse') != 0) {
             $tablecolumns[] = 'timeaccess';
             $tableheaders[] = get_string('lastonline', 'block_completion_progress');
@@ -117,6 +120,7 @@ class overview extends \table_sql {
 
         $this->set_attribute('class', 'overviewTable');
         $this->column_class('fullname', 'col-fullname');
+        $this->column_class('email', 'col-email');
         $this->column_class('timeaccess', 'col-timeaccess');
         $this->column_class('progressbar', 'col-progressbar');
         $this->column_class('progress', 'col-progress');
