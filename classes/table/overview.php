@@ -30,6 +30,7 @@ defined('MOODLE_INTERNAL') || die;
 use block_completion_progress\completion_progress;
 
 require_once($CFG->libdir.'/tablelib.php');
+require_once($CFG->dirroot . '/completion/completion_completion.php');
 
 
 /**
@@ -97,21 +98,20 @@ class overview extends \table_sql {
         
         $tablecolumns[] = 'email';
         $tableheaders[] = get_string('email');
-        
-        if (get_config('block_completion_progress', 'showlastincourse') != 0) {
-            $tablecolumns[] = 'timeaccess';
-            $tableheaders[] = get_string('lastonline', 'block_completion_progress');
-        }
 
         $tablecolumns[] = 'progressbar';
         $tableheaders[] = get_string('progressbar', 'block_completion_progress');
         $tablecolumns[] = 'progress';
         $tableheaders[] = get_string('progress', 'block_completion_progress');
+        
+        $tablecolumns[] = 'timecompleted';
+        $tableheaders[] = get_string('lastonline', 'block_completion_progress') . ' /<br> ' .get_string('completiondate', 'report_completion');
 
         $this->define_columns($tablecolumns);
         $this->define_headers($tableheaders);
         $this->sortable(true, 'firstname');
         $this->no_sorting('progressbar');
+        $this->no_sorting('timecompleted');
 
         if ($bulkoperations) {
             $this->column_class('select', 'col-select');
@@ -121,7 +121,7 @@ class overview extends \table_sql {
         $this->set_attribute('class', 'overviewTable');
         $this->column_class('fullname', 'col-fullname');
         $this->column_class('email', 'col-email');
-        $this->column_class('timeaccess', 'col-timeaccess');
+        $this->column_class('timecompleted', 'col-timecompleted');
         $this->column_class('progressbar', 'col-progressbar');
         $this->column_class('progress', 'col-progress');
 
@@ -274,16 +274,21 @@ class overview extends \table_sql {
         }
     }
 
-    /**
-     * Format the time last accessed value.
-     * @param object $row
-     * @return string HTML
-     */
-    public function col_timeaccess($row) {
-        if ($row->timeaccess == 0) {
+    public function col_timecompleted($row) {
+        $params = array(
+        'userid'    => $row->id,
+        'course'    => $this->progress->get_course()->id,
+        );
+        $ccompletion = new \completion_completion($params);
+        $scomplete = '-';
+        if ($ccompletion->is_complete()) {
+          return userdate($ccompletion->timecompleted, get_string('strftimedatefullshort', 'langconfig'));
+        } else if ($row->timeaccess == 0) {
             return $this->strs['never'];
+        } else {
+          return userdate($row->timeaccess, get_string('strftimedatefullshort', 'langconfig'));
         }
-        return userdate($row->timeaccess, $this->strs['strftimedaydatetime']);
+        
     }
 
     /**
@@ -305,6 +310,14 @@ class overview extends \table_sql {
         if ($pct === null) {
             return $this->strs['indeterminate'];
         }
-        return get_string('percents', '', $pct);
+        //return get_string('percents', '', $pct);
+         if ($this->is_downloading()) {
+           $color = 'red';
+           if ($pct > 0) $color = "yellow";
+           if ($pct > 99) $color = "green";
+           return '<div style="background: '.$color.';padding: 3px;text-align: center;">' . get_string('percents', '', $pct) . '</div>';
+         } else {
+           return get_string('percents', '', $pct);
+         }
     }
 }

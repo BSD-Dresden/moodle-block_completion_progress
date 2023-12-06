@@ -150,8 +150,8 @@ $table->setup();
 
 if ($download) {
     if ($download == 'html') {
-      echo html_writer::tag('h3', get_string('course') . ': ' . $course->fullname, array('style' => 'text-align: center;'));
-      echo html_writer::tag('h3', $enddate, array('style' => 'text-align: center;'));
+      echo html_writer::tag('h3', get_string('course') . ': ' . $course->fullname);
+      echo html_writer::tag('h3', $enddate);
     }
     
     $table->query_db($perpage);
